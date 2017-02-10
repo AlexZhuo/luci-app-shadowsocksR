@@ -13,7 +13,7 @@ define Package/$(PKG_NAME)
     SECTION:=utils
     CATEGORY:=Utilities
     TITLE:=luci for shadowsocksR
-        DEPENDS:=+shadowsocksr-libev +pdnsd +kmod-ipt-ipopt +iptables-mod-ipopt +ipset +ip-full +iptables-mod-tproxy +kmod-ipt-tproxy +iptables-mod-nat-extra
+        DEPENDS:=+shadowsocksr-libev +pdnsd +ipset +ip-full +iptables-mod-tproxy +kmod-ipt-tproxy +iptables-mod-nat-extra
 endef
 
 define Package/$(PKG_NAME)/description
