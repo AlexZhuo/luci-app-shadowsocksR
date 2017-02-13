@@ -17,7 +17,7 @@ else
 end
 
 m = Map("shadowsocksr", translate("Shadowsocksr Transparent Proxy"),
-	translate("A fast secure tunnel proxy that help you get through firewalls on your router").."<br>注意：如果出现国内网站上不去的情况，请到【DHCP/DNS】中将【DNS转发】填入【114.114.114.114】，并勾选【忽略解析文件】或直接手动开启Pdnsd服务,使用教程请<a href='http://www.right.com.cn/forum/thread-198649-1-1.html'>点击这里</a><br><br>" .. "状态 - " .. state_msg)
+	translate("A fast secure tunnel proxy that help you get through firewalls on your router").."<br>使用教程请<a href='http://www.right.com.cn/forum/thread-198649-1-1.html'>点击这里</a><br><br>" .. "状态 - " .. state_msg)
 
 s = m:section(TypedSection, "shadowsocksr", translate("Settings"))
 s.anonymous = true
@@ -94,18 +94,18 @@ timeout:depends("more", "1")
 
 proxy_mode = s:option(ListValue, "proxy_mode", translate("Proxy Mode"),
 	translate("GFW-List mode requires flushing DNS cache") .. "<br /> " ..
-	"<a href=\"" .. luci.dispatcher.build_url("admin", "services", "gfwlist") .. "\">" ..
+	"<a href=\"" .. luci.dispatcher.build_url("admin", "services","shadowsocksr","gfwlist") .. "\">" ..
 	translate("Click here to customize your GFW-List") ..
 	"</a>")
-proxy_mode:value("M", translate("GFW-List based auto-proxy"))
 proxy_mode:value("S", translate("All non-China IPs"))
+proxy_mode:value("M", translate("GFW-List based auto-proxy"))
 proxy_mode:value("G", translate("All Public IPs"))
 proxy_mode:value("V", translate("Watching Youku overseas"))
-proxy_mode:value("GAME", translate("游戏模式"))--alex:添加游戏模式
+proxy_mode:value("GAME", translate("Game Mode"))--alex:添加游戏模式
 proxy_mode:depends("more", "1")
 
 safe_dns = s:option(Value, "safe_dns", translate("Safe DNS"),
-	translate("推荐使用OpenDNS"))
+	translate("recommend OpenDNS"))
 safe_dns.datatype = "ip4addr"
 safe_dns.optional = false
 safe_dns.placeholder = "208.67.220.220"
@@ -119,7 +119,7 @@ safe_dns_port.optional = false
 safe_dns_port:depends("more", "1")
 
 
-dns_mode = s:option(ListValue, "dns_mode", translate("DNS解析模式"),
+dns_mode = s:option(ListValue, "dns_mode", translate("DNS Mode"),
 	translate("推荐使用GFWList自动模式,可分流国内外"))
 dns_mode:value("tcp_gfwlist", translate("GFWList自动模式"))
 dns_mode:value("tcp_114", translate("国内TCP解析模式"))
@@ -130,11 +130,11 @@ dns_mode:value("safe_only", translate("普通方式请求安全DNS"))
 dns_mode:value("local", translate("系统默认模式(会污染)"))
 dns_mode:depends("more", "1")
 
-protocol_param = s:option(Value, "protocol_param", translate("协议参数"),
+protocol_param = s:option(Value, "protocol_param", translate("Protocol Param"),
 	translate("一般不填"))
 protocol_param:depends("more", "1")
 
-obfs_param= s:option(Value, "obfs_param", translate("混淆参数"),
+obfs_param= s:option(Value, "obfs_param", translate("Obfs Param"),
 	translate("一般不填"))
 obfs_param:depends("more", "1") 
 adbyby=s:option(Flag,"adbyby",translate("配合Adbyby或koolproxy使用"),translate("未开启Adbyby或koolproxy时请不要勾选此项"))

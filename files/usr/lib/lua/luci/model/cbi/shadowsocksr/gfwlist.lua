@@ -15,12 +15,12 @@ function sync_value_to_file(value, file)
 	end
 end
 
-m = Map("gfwlist", translate("Domain Lists Settings"),translate("第一张表是GFWList,可以观察当前域名黑名单，更新后会发生变化;<br>第二张表是你在国外回连到国外指定走代理的名单,也就是优酷这样国内视频网站的域名;<br>第三张表是自定义GFWList,不会被更新所覆盖。<br>注意：点击更新按钮后需要等浏览器自动刷新后才算完成，请勿重复点击，并且自动刷新一遍后需要手动再刷新一遍才能观察到数字变化<br>使用教程请<a href='http://www.right.com.cn/forum/thread-198649-1-1.html'>点击这里</a>"))
+m = Map("gfwlist", translate("Domain Lists Settings"),translate("‘GFWList黑名单’可以观察当前域名黑名单，更新后会发生变化;<br>‘海外看视频网站名单’是你在国外回连到国外指定走代理的名单,也就是优酷这样国内视频网站的域名;<br>‘用户自定义网站黑名单’不会被GFWList更新所覆盖，可以手动添加一些强制走代理的网站。<br>注意：点击更新按钮后需要等浏览器自动刷新后才算完成，请勿重复点击，并且自动刷新一遍后需要手动再刷新一遍才能观察到数字变化<br>使用教程请<a href='http://www.right.com.cn/forum/thread-198649-1-1.html'>点击这里</a>"))
 s = m:section(TypedSection, "params", translate("Settings"))
 s.anonymous = true
 
 for e in fs.dir("/etc/gfwlist") do
-	glist = s:option(TextValue, e, e, nil)
+	glist = s:option(TextValue, e, translate(e), nil)
 	glist.rmempty = false
 	glist.rows = 12
 
