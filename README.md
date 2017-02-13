@@ -1,6 +1,6 @@
 OpenWrt LuCI for ShadowsocksR-libev
 ===
-
+恩山乌卡卡版本的升级版,已在[该固件][O]中应用
 简介
 ---
 
@@ -62,6 +62,12 @@ make menuconfig
 make package/luci-app-shadowsocksR/compile V=99
 ```
 
+软件截图
+---
 
+![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/shadowsocksR_1.png)
+![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/shadowsocksR_2.png)
+
+[O]: http://www.right.com.cn/forum/thread-198649-1-1.html
 [openwrt-shadowsocksR]: https://github.com/AlexZhuo/openwrt-shadowsocksr
 [openwrt-sdk]: https://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
