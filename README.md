@@ -14,13 +14,13 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 3、支持国外翻回国内看优酷等视频网站
 
-4、支持基于GFWList的只能DNS解析
+4、支持基于GFWList的智能DNS解析
 
 5、支持`auth_sha1_v4`,`auth_aes128_md5`,`auth_aes128_sha1`等新型混淆协议
 
 6、支持混淆参数和协议参数
 
-7、支持游戏模式（全局UDP转发）
+7、支持游戏模式（全局+国内分流UDP转发）
 
 8、支持Adbyby和KoolProxy兼容模式
 
@@ -30,6 +30,9 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 11、支持填写服务器域名或者服务器IP
 
+12、可配合HAProxy实现多服务器负载均衡，也可以设置多个备用服务器实现高可用，[详情][haproxy]
+
+13、可配合KCPTUN提高网络质量，[详情][kcptun]
 依赖
 ---
 
@@ -56,6 +59,10 @@ tar xjf OpenWrt-SDK-ar71xx-for-linux-x86_64-gcc-4.8-linaro_uClibc-0.9.33.2.tar.b
 cd OpenWrt-SDK-ar71xx-*
 # Clone 项目
 git clone https://github.com/AlexZhuo/luci-app-shadowsocksR.git package/luci-app-shadowsocksR
+# 编译 po2lmo (如果有po2lmo可跳过)
+pushd package/luci-app-shadowsocksR/tools/po2lmo
+make && sudo make install
+popd
 # 选择要编译的包 LuCI -> 3. Applications
 make menuconfig
 # 开始编译
@@ -71,3 +78,5 @@ make package/luci-app-shadowsocksR/compile V=99
 [O]: http://www.right.com.cn/forum/thread-198649-1-1.html
 [openwrt-shadowsocksR]: https://github.com/AlexZhuo/openwrt-shadowsocksr
 [openwrt-sdk]: https://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
+[haproxy]: https://github.com/AlexZhuo/luci-app-haproxy-tcp
+[kcptun]: https://github.com/AlexZhuo/luci-app-kcptun
