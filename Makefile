@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-shadowsocksR
-PKG_VERSION=1.1
+PKG_VERSION=1.2
 PKG_RELEASE:=1
 PKG_MAINTAINER:=Alex Zhuo <1886090@gmail.com>
 
@@ -10,9 +10,11 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-    SECTION:=utils
-    CATEGORY:=Utilities
-    TITLE:=luci for shadowsocksR
+	SECTION:=luci
+	CATEGORY:=Network
+	SUBMENU:=Luci 
+	PKGARCH:=all
+	TITLE:=luci for shadowsocksR
         DEPENDS:=+shadowsocksr-libev +pdnsd +ipset +ip-full +iptables-mod-tproxy +kmod-ipt-tproxy +iptables-mod-nat-extra
 endef
 

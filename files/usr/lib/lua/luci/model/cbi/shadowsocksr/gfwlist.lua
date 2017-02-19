@@ -48,6 +48,31 @@ function button_update_route.write (self, section, value)
 	luci.sys.call ( "/etc/update_chinaroute.sh > /dev/null")
 end 
 
+-- [[ LAN Hosts ]]--
+s = m:section(TypedSection, "lan_hosts", translate("LAN Hosts"))
+s.template = "cbi/tblsection"
+s.addremove = true
+s.anonymous = true
 
+o = s:option(Value, "host", translate("Host"))
+luci.sys.net.arptable(function(x)
+	o:value(x["IP address"], "%s (%s)" %{x["IP address"], x["HW address"]})
+end)
+o.datatype = "ip4addr"
+o.rmempty = false
+
+o = s:option(ListValue, "type", translate("Proxy Type"))
+o:value("direct", translate("Direct (No Proxy)"))
+o:value("normal", translate("Normal"))
+o:value("gfwlist", translate("GFW-List based auto-proxy"))
+o:value("nochina", translate("All non-China IPs"))
+o:value("game", translate("Game Mode"))
+o:value("all", translate("All Public IPs"))
+o:value("youku", translate("Watching Youku overseas"))
+o.rmempty = false
+
+o = s:option(Flag, "enable", translate("Enable"))
+o.default = "1"
+o.rmempty = false
 
 return m

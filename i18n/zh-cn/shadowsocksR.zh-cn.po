@@ -117,3 +117,9 @@ msgstr "点击此处自定义网站黑名单"
 
 msgid "GFW-List mode requires flushing DNS cache"
 msgstr "GFWList模式需要客户端DNS缓存"
+
+msgid "Direct (No Proxy)"
+msgstr "直接连接（不代理）"
+
+msgid "Normal"
+msgstr "正常代理"

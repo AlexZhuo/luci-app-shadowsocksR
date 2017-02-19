@@ -33,6 +33,9 @@ OpenWrt LuCI for ShadowsocksR-libev
 12、可配合HAProxy实现多服务器负载均衡，也可以设置多个备用服务器实现高可用，[详情][haproxy]
 
 13、可配合KCPTUN提高网络质量，[详情][kcptun]
+
+14、支持LAN访问控制（Adbyby/KoolProxy模式需要配合以上二者自己的访问控制功能使用，否则会冲突）
+
 依赖
 ---
 
@@ -63,7 +66,7 @@ git clone https://github.com/AlexZhuo/luci-app-shadowsocksR.git package/luci-app
 pushd package/luci-app-shadowsocksR/tools/po2lmo
 make && sudo make install
 popd
-# 选择要编译的包 LuCI -> 3. Applications
+# 选择要编译的包 NetWork -> LuCI -> luci-app-shadowsocksR
 make menuconfig
 # 开始编译
 make package/luci-app-shadowsocksR/compile V=99
@@ -72,8 +75,8 @@ make package/luci-app-shadowsocksR/compile V=99
 软件截图
 ---
 
-![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/shadowsocksR_1.png)
-![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/shadowsocksR_2.png)
+![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/ssr1.png)
+![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/ssr2.png)
 
 [O]: http://www.right.com.cn/forum/thread-198649-1-1.html
 [openwrt-shadowsocksR]: https://github.com/AlexZhuo/openwrt-shadowsocksr

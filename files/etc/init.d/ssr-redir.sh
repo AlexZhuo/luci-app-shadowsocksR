@@ -118,6 +118,8 @@ EOF
 		iptables -t nat -A shadowsocksr_pre -d 127.0.0.0/8 -j RETURN
 		iptables -t nat -A shadowsocksr_pre -d 224.0.0.0/3 -j RETURN
 	}
+	
+
 	iptables -t mangle -A SSRUDP -m set --match-set local dst -j RETURN || {
 		iptables -t mangle -A SSRUDP -d 10.0.0.0/8 -j RETURN
 		iptables -t mangle -A SSRUDP  -d 127.0.0.0/8 -j RETURN
@@ -130,8 +132,73 @@ EOF
 	iptables -t nat -A shadowsocksr_pre -d $vt_server_addr -j RETURN
 	iptables -t mangle -A SSRUDP -d $vt_server_addr -j RETURN
 
+	COUNTER=0 #添加内网访问控制
+	while true
+	do	
+		local host=`uci get gfwlist.@lan_hosts[$COUNTER].host 2>/dev/null`
+		local lan_enable=`uci get gfwlist.@lan_hosts[$COUNTER].enable 2>/dev/null`
+		local mType=`uci get gfwlist.@lan_hosts[$COUNTER].type 2>/dev/null`
+
+		if [ -z "$host" ] || [ -z "$mType" ]; then
+			echo $COUNTER ohohoho
+			break
+		fi
+		echo now is $host
+		COUNTER=$(($COUNTER+1))
+		if [ "$lan_enable" = "0" ]; then
+			continue
+		fi
+
+		case $mType in
+			direct)
+				iptables -t nat -A shadowsocksr_pre -s $host -j RETURN
+				iptables -t mangle -A SSRUDP -s $host -j RETURN
+				;;
+			gfwlist)
+				mkdir -p /var/etc/dnsmasq-go.d
+				ipset create china-banned hash:ip maxelem 65536 2>/dev/null
+				iptables -t nat -A shadowsocksr_pre -s $host -m set ! --match-set china-banned dst -j RETURN
+				iptables -t nat -A shadowsocksr_pre -s $host -m set --match-set $vt_np_ipset dst -j RETURN
+				echo this $host is gfwlist
+				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
+					/etc/gfwlist/china-banned > /var/etc/dnsmasq-go.d/02-ipset.conf
+
+				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
+					/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/02-ipset.conf
+
+				;;
+			youku)
+				mkdir -p /var/etc/dnsmasq-go.d
+				vt_np_ipset=""
+				ipset create unblock-youku hash:ip maxelem 65536 2>/dev/null
+				iptables -t nat -A shadowsocksr_pre -m set ! --match-set unblock-youku dst -j RETURN
+				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"unblock-youku"'\n",$0)}' \
+					/etc/gfwlist/unblock-youku > /var/etc/dnsmasq-go.d/02-ipset.conf
+				;;
+
+			nochina)
+				iptables -t nat -A shadowsocksr_pre -s $host -m set --match-set $vt_np_ipset dst -j RETURN
+				;;
+			game)
+				iptables -t nat -A shadowsocksr_pre -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
+				iptables -t mangle -A SSRUDP -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
+				ip rule add fwmark 0x01/0x01 table 100
+				ip route add local 0.0.0.0/0 dev lo table 100
+				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
+				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
+				;;
+			all)
+				;;
+
+			normal)
+				;;
+		esac
+		iptables -t nat -A shadowsocksr_pre -s $host -p tcp -j REDIRECT --to $SS_REDIR_PORT #内网访问控制
+	done
+
 	case "$vt_proxy_mode" in
-		G) : ;;
+		G) 
+			;;
 		S)#alex:所有境外IP
 			iptables -t nat -A shadowsocksr_pre -m set --match-set $vt_np_ipset dst -j RETURN
 			;;
@@ -152,6 +219,9 @@ EOF
 			ip route add local 0.0.0.0/0 dev lo table 100
 			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 			iptables -t mangle -A PREROUTING -j SSRUDP
+			;;
+		DIRECT)#alex添加访问控制
+			iptables -t nat -A shadowsocksr_pre -p tcp -j RETURN
 			;;
 	esac
 	local subnet

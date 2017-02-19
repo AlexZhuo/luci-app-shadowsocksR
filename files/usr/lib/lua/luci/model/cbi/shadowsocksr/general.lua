@@ -102,6 +102,7 @@ proxy_mode:value("M", translate("GFW-List based auto-proxy"))
 proxy_mode:value("G", translate("All Public IPs"))
 proxy_mode:value("V", translate("Watching Youku overseas"))
 proxy_mode:value("GAME", translate("Game Mode"))--alex:添加游戏模式
+proxy_mode:value("DIRECT", translate("Direct (No Proxy)"))--alex:添加访问控制
 proxy_mode:depends("more", "1")
 
 safe_dns = s:option(Value, "safe_dns", translate("Safe DNS"),
@@ -140,6 +141,8 @@ obfs_param:depends("more", "1")
 adbyby=s:option(Flag,"adbyby",translate("配合Adbyby或koolproxy使用"),translate("未开启Adbyby或koolproxy时请不要勾选此项"))
 adbyby:depends("more", "1") 
 adbyby.rmempty=false
+
+
 
 -- ---------------------------------------------------
 local apply = luci.http.formvalue("cbi.apply")
