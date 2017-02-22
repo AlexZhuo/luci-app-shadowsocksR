@@ -67,6 +67,7 @@ o:value("normal", translate("Normal"))
 o:value("gfwlist", translate("GFW-List based auto-proxy"))
 o:value("nochina", translate("All non-China IPs"))
 o:value("game", translate("Game Mode"))
+o:value("game2", translate("Game Mode V2"))
 o:value("all", translate("All Public IPs"))
 o:value("youku", translate("Watching Youku overseas"))
 o.rmempty = false

@@ -19,7 +19,7 @@ msgstr "加密方式"
 msgid "Protocol"
 msgstr "混淆协议"
 
-msgid "Obfs Param"
+msgid "Obfs"
 msgstr "混淆方式"
 
 msgid "Clear Client Log"
@@ -116,10 +116,40 @@ msgid "Click here to customize your GFW-List"
 msgstr "点击此处自定义网站黑名单"
 
 msgid "GFW-List mode requires flushing DNS cache"
-msgstr "GFWList模式需要客户端DNS缓存"
+msgstr "GFWList模式需要客户端清空DNS缓存"
 
 msgid "Direct (No Proxy)"
 msgstr "直接连接（不代理）"
 
+msgid "Local TCP mode"
+msgstr "本地TCP解析模式"
+
 msgid "Normal"
 msgstr "正常代理"
+
+msgid "Remote TCP mode"
+msgstr "全局代理TCP解析模式"
+
+msgid "Tunnel mode based on GFWLIST"
+msgstr "基于GFWList隧道模式"
+
+msgid "Tunnel mode for all"
+msgstr "全局隧道模式"
+
+msgid "Local safe DNS"
+msgstr "本地请求安全DNS"
+
+msgid "System default"
+msgstr "系统默认模式(会污染)"
+
+msgid "Suggest using GFW-List based auto-proxy"
+msgstr "推荐使用GFWList自动模式,可分流国内外"
+
+msgid "leave it empty is well"
+msgstr "一般不填"
+
+msgid "Game Mode V2"
+msgstr "游戏模式V2"
+
+
+

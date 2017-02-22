@@ -71,7 +71,7 @@ protocol:value("auth_sha1_v4")
 protocol:value("auth_aes128_sha1")
 protocol:value("auth_aes128_md5")
 
-obfs = s:option(ListValue, "obfs", translate("Obfs Param"))
+obfs = s:option(ListValue, "obfs", translate("Obfs"))
 obfs:value("plain")
 obfs:value("http_simple")
 obfs:value("http_post")
@@ -102,6 +102,7 @@ proxy_mode:value("M", translate("GFW-List based auto-proxy"))
 proxy_mode:value("G", translate("All Public IPs"))
 proxy_mode:value("V", translate("Watching Youku overseas"))
 proxy_mode:value("GAME", translate("Game Mode"))--alex:添加游戏模式
+proxy_mode:value("GAME2", translate("Game Mode V2"))--alex:添加游戏模式V2
 proxy_mode:value("DIRECT", translate("Direct (No Proxy)"))--alex:添加访问控制
 proxy_mode:depends("more", "1")
 
@@ -121,22 +122,22 @@ safe_dns_port:depends("more", "1")
 
 
 dns_mode = s:option(ListValue, "dns_mode", translate("DNS Mode"),
-	translate("推荐使用GFWList自动模式,可分流国内外"))
-dns_mode:value("tcp_gfwlist", translate("GFWList自动模式"))
-dns_mode:value("tcp_114", translate("国内TCP解析模式"))
-dns_mode:value("tcp_proxy", translate("远程TCP解析模式(适合全局代理)"))
-dns_mode:value("tunnel_gfwlist", translate("GFWList隧道模式"))
-dns_mode:value("tunnel_all", translate("纯隧道模式(适合全局代理)"))
-dns_mode:value("safe_only", translate("普通方式请求安全DNS"))
-dns_mode:value("local", translate("系统默认模式(会污染)"))
+	translate("Suggest using GFW-List based auto-proxy"))
+dns_mode:value("tcp_gfwlist", translate("GFW-List based auto-proxy"))
+dns_mode:value("tcp_114", translate("Local TCP mode"))
+dns_mode:value("tcp_proxy", translate("Remote TCP mode"))
+dns_mode:value("tunnel_gfwlist", translate("Tunnel mode based on GFWLIST"))
+dns_mode:value("tunnel_all", translate("Tunnel mode for all"))
+dns_mode:value("safe_only", translate("Local safe DNS"))
+dns_mode:value("local", translate("System default"))
 dns_mode:depends("more", "1")
 
 protocol_param = s:option(Value, "protocol_param", translate("Protocol Param"),
-	translate("一般不填"))
+	translate("leave it empty is well"))
 protocol_param:depends("more", "1")
 
 obfs_param= s:option(Value, "obfs_param", translate("Obfs Param"),
-	translate("一般不填"))
+	translate("leave it empty is well"))
 obfs_param:depends("more", "1") 
 adbyby=s:option(Flag,"adbyby",translate("配合Adbyby或koolproxy使用"),translate("未开启Adbyby或koolproxy时请不要勾选此项"))
 adbyby:depends("more", "1") 

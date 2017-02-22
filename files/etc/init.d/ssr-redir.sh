@@ -160,12 +160,13 @@ EOF
 				iptables -t nat -A shadowsocksr_pre -s $host -m set ! --match-set china-banned dst -j RETURN
 				iptables -t nat -A shadowsocksr_pre -s $host -m set --match-set $vt_np_ipset dst -j RETURN
 				echo this $host is gfwlist
+				[ -f /var/etc/dnsmasq-go.d/02-ipset.conf ] || {
 				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
 					/etc/gfwlist/china-banned > /var/etc/dnsmasq-go.d/02-ipset.conf
 
 				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
 					/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/02-ipset.conf
-
+				}
 				;;
 			youku)
 				mkdir -p /var/etc/dnsmasq-go.d
@@ -186,6 +187,27 @@ EOF
 				ip route add local 0.0.0.0/0 dev lo table 100
 				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
+				;;
+			game2)
+				mkdir -p /var/etc/dnsmasq-go.d
+				ipset create china-banned hash:ip maxelem 65536 2>/dev/null
+				iptables -t nat -A shadowsocksr_pre -s $host -m set ! --match-set china-banned dst -j RETURN
+				iptables -t nat -A shadowsocksr_pre -s $host -m set --match-set $vt_np_ipset dst -j RETURN
+				echo this $host is gfwlist
+
+				iptables -t mangle -A SSRUDP -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
+				ip rule add fwmark 0x01/0x01 table 100
+				ip route add local 0.0.0.0/0 dev lo table 100
+				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
+				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
+
+				[ -f /var/etc/dnsmasq-go.d/02-ipset.conf ] || {
+				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
+					/etc/gfwlist/china-banned > /var/etc/dnsmasq-go.d/02-ipset.conf
+
+				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
+					/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/02-ipset.conf
+				}
 				;;
 			all)
 				;;
@@ -214,6 +236,17 @@ EOF
 			;;
 		GAME)#alex:游戏模式
 			iptables -t nat -A shadowsocksr_pre -m set --match-set $vt_np_ipset dst -j RETURN
+			iptables -t mangle -A SSRUDP -m set --match-set $vt_np_ipset dst -j RETURN
+			ip rule add fwmark 0x01/0x01 table 100
+			ip route add local 0.0.0.0/0 dev lo table 100
+			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
+			iptables -t mangle -A PREROUTING -j SSRUDP
+			;;
+		GAME2)
+			ipset create china-banned hash:ip maxelem 65536 2>/dev/null
+			iptables -t nat -A shadowsocksr_pre -m set ! --match-set china-banned dst -j RETURN
+			iptables -t nat -A shadowsocksr_pre -m set --match-set $vt_np_ipset dst -j RETURN
+
 			iptables -t mangle -A SSRUDP -m set --match-set $vt_np_ipset dst -j RETURN
 			ip rule add fwmark 0x01/0x01 table 100
 			ip route add local 0.0.0.0/0 dev lo table 100
@@ -276,12 +309,14 @@ EOF
 
 	###### dnsmasq-to-ipset configuration ######
 	case "$vt_proxy_mode" in
-		M)
+		M | GAME2)
+			[ -f /var/etc/dnsmasq-go.d/02-ipset.conf ] || {
 			awk '!/^$/&&!/^#/{printf("ipset=/%s/'"$vt_gfwlist"'\n",$0)}' \
 				/etc/gfwlist/$vt_gfwlist > /var/etc/dnsmasq-go.d/02-ipset.conf
 
 			awk '!/^$/&&!/^#/{printf("ipset=/%s/'"$vt_gfwlist"'\n",$0)}' \
 				/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/02-ipset.conf
+			}
 			;;
 			
 		V)
@@ -325,7 +360,7 @@ EOF
 
 stop()
 {
-	local vt_proxy_mode=`uci get minivtun.@minivtun[0].proxy_mode`
+	local vt_proxy_mode=`uci get shadowsocksr.@shadowsocksr[0].proxy_mode`
 	local vt_gfwlist=`__gfwlist_by_mode $vt_proxy_mode`
 
 	# -----------------------------------------------------------------
