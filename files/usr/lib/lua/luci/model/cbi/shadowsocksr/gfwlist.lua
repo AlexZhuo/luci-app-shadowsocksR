@@ -76,4 +76,10 @@ o = s:option(Flag, "enable", translate("Enable"))
 o.default = "1"
 o.rmempty = false
 
+-- ---------------------------------------------------
+local apply = luci.http.formvalue("cbi.apply")
+if apply then
+	os.execute("/etc/init.d/ssr-redir.sh restart >/dev/null 2>&1 &")
+end
+
 return m
