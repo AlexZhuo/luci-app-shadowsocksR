@@ -183,8 +183,8 @@ EOF
 			game)
 				iptables -t nat -A shadowsocksr_pre -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
 				iptables -t mangle -A SSRUDP -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
-				ip rule add fwmark 0x01/0x01 table 100
-				ip route add local 0.0.0.0/0 dev lo table 100
+				ip rule add fwmark 1 lookup 100
+				ip route add local default dev lo table 100
 				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
 				;;
@@ -196,8 +196,8 @@ EOF
 				echo this $host is gfwlist
 
 				iptables -t mangle -A SSRUDP -s $host  -m set --match-set $vt_np_ipset dst -j RETURN
-				ip rule add fwmark 0x01/0x01 table 100
-				ip route add local 0.0.0.0/0 dev lo table 100
+				ip rule add fwmark 1 lookup 100
+				ip route add local default dev lo table 100
 				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
 
@@ -237,8 +237,8 @@ EOF
 		GAME)#alex:游戏模式
 			iptables -t nat -A shadowsocksr_pre -m set --match-set $vt_np_ipset dst -j RETURN
 			iptables -t mangle -A SSRUDP -m set --match-set $vt_np_ipset dst -j RETURN
-			ip rule add fwmark 0x01/0x01 table 100
-			ip route add local 0.0.0.0/0 dev lo table 100
+			ip rule add fwmark 1 lookup 100
+			ip route add local default dev lo table 100
 			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 			iptables -t mangle -A PREROUTING -j SSRUDP
 			;;
@@ -248,8 +248,8 @@ EOF
 			iptables -t nat -A shadowsocksr_pre -m set --match-set $vt_np_ipset dst -j RETURN
 
 			iptables -t mangle -A SSRUDP -m set --match-set $vt_np_ipset dst -j RETURN
-			ip rule add fwmark 0x01/0x01 table 100
-			ip route add local 0.0.0.0/0 dev lo table 100
+			ip rule add fwmark 1 lookup 100
+			ip route add local default dev lo table 100
 			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
 			iptables -t mangle -A PREROUTING -j SSRUDP
 			;;
