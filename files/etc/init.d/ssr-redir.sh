@@ -329,6 +329,7 @@ EOF
 	###### Restart main 'dnsmasq' service if needed ######
 	if ls /var/etc/dnsmasq-go.d/* >/dev/null 2>&1; then
 		mkdir -p /tmp/dnsmasq.d
+		echo 准备生成/tmp/dnsmasq.d/dnsmasq-go.conf！！！！！！！！！！！！！！！！！！
 		cat > /tmp/dnsmasq.d/dnsmasq-go.conf <<EOF
 conf-dir=/var/etc/dnsmasq-go.d
 EOF
@@ -339,14 +340,29 @@ EOF
 		local i
 		for i in 0 1 2 3 4 5 6 7; do
 			sleep 1
-			local dnsmasq_pid=`cat /var/run/dnsmasq.pid 2>/dev/null || cat /var/run/dnsmasq/dnsmasq.pid 2>/dev/null`
+			local dnsmasq_pid=`cat /var/run/dnsmasq.pid 2>/dev/nul`
 			if [ -n "$dnsmasq_pid" ]; then
 				if kill -0 "$dnsmasq_pid" 2>/dev/null; then
 					dnsmasq_ok=Y
 					break
 				fi
 			fi
+			[ ! -d /var/run/dnsmasq ] && continue
+			
+			for files in /var/run/dnsmasq/*; do
+				echo 正在检查$files
+				local dnsmasq_pid2=`cat $files`
+				if [ -n "$dnsmasq_pid2" ]; then
+					if kill -0 "$dnsmasq_pid2" 2>/dev/null; then
+						dnsmasq_ok=Y
+						break
+					fi
+				fi
+			done
+			[ "$dnsmasq_ok" == Y ] && break
+			
 		done
+		echo dnsmasq_pid是-----$dnsmasq_pid ------------ok是$dnsmasq_ok
 		if [ "$dnsmasq_ok" != Y ]; then
 			echo "WARNING: Attached dnsmasq rules will cause the service startup failure. Removed those configurations."
 			rm -f /tmp/dnsmasq.d/dnsmasq-go.conf
