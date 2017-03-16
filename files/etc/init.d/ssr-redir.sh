@@ -340,7 +340,7 @@ EOF
 		local i
 		for i in 0 1 2 3 4 5 6 7; do
 			sleep 1
-			local dnsmasq_pid=`cat /var/run/dnsmasq.pid 2>/dev/nul`
+			local dnsmasq_pid=`cat /var/run/dnsmasq.pid 2>/dev/null`
 			if [ -n "$dnsmasq_pid" ]; then
 				if kill -0 "$dnsmasq_pid" 2>/dev/null; then
 					dnsmasq_ok=Y
@@ -348,9 +348,7 @@ EOF
 				fi
 			fi
 			[ ! -d /var/run/dnsmasq ] && continue
-			
 			for files in /var/run/dnsmasq/*; do
-				echo 正在检查$files
 				local dnsmasq_pid2=`cat $files`
 				if [ -n "$dnsmasq_pid2" ]; then
 					if kill -0 "$dnsmasq_pid2" 2>/dev/null; then
@@ -360,7 +358,6 @@ EOF
 				fi
 			done
 			[ "$dnsmasq_ok" == Y ] && break
-			
 		done
 		echo dnsmasq_pid是-----$dnsmasq_pid ------------ok是$dnsmasq_ok
 		if [ "$dnsmasq_ok" != Y ]; then
@@ -369,9 +366,6 @@ EOF
 			/etc/init.d/dnsmasq restart
 		fi
 	fi
-
-	
-
 }
 
 stop()
