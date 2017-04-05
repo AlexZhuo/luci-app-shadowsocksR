@@ -186,7 +186,6 @@ EOF
 				ip rule add fwmark 1 lookup 100
 				ip route add local default dev lo table 100
 				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
-				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
 				;;
 			game2)
 				mkdir -p /var/etc/dnsmasq-go.d
@@ -199,7 +198,6 @@ EOF
 				ip rule add fwmark 1 lookup 100
 				ip route add local default dev lo table 100
 				iptables -t mangle -A SSRUDP -s $host  -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
-				iptables -t mangle -A PREROUTING -s $host  -j SSRUDP
 
 				[ -f /var/etc/dnsmasq-go.d/02-ipset.conf ] || {
 				awk '!/^$/&&!/^#/{printf("ipset=/%s/'"china-banned"'\n",$0)}' \
@@ -240,7 +238,7 @@ EOF
 			ip rule add fwmark 1 lookup 100
 			ip route add local default dev lo table 100
 			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
-			iptables -t mangle -A PREROUTING -j SSRUDP
+
 			;;
 		GAME2)
 			ipset create china-banned hash:ip maxelem 65536 2>/dev/null
@@ -251,7 +249,7 @@ EOF
 			ip rule add fwmark 1 lookup 100
 			ip route add local default dev lo table 100
 			iptables -t mangle -A SSRUDP -p udp -j TPROXY --on-port $SS_REDIR_PORT --tproxy-mark 0x01/0x01
-			iptables -t mangle -A PREROUTING -j SSRUDP
+
 			;;
 		DIRECT)#alex添加访问控制
 			iptables -t nat -A shadowsocksr_pre -p tcp -j RETURN
@@ -263,6 +261,7 @@ EOF
 	#done
 	iptables -t nat -A shadowsocksr_pre -p tcp -j REDIRECT --to $SS_REDIR_PORT #alex:添加局域网软路由支持
 	iptables -t nat -I prerouting_rule -p tcp -j shadowsocksr_pre
+	iptables -t mangle -A PREROUTING -j SSRUDP
 	if [ "$adbyby" = '1' ];then
 		iptables -t nat -A OUTPUT -p tcp -m multiport --dports 80,443 -j shadowsocksr_pre
 	fi
