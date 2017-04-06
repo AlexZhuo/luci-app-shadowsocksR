@@ -278,14 +278,24 @@ EOF
 			
 			awk -vs="127.0.0.1#$PDNSD_LOCAL_PORT" '!/^$/&&!/^#/{printf("server=/%s/%s\n",$0,s)}' \
 				/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/01-pollution.conf
+
+			uci set dhcp.@dnsmasq[0].resolvfile=/tmp/resolv.conf.auto
+			uci delete dhcp.@dnsmasq[0].noresolv
+			uci commit dhcp
 			;;
 		tcp_114)
 			start_pdnsd "$vt_safe_dns" "$vt_dns_mode"
 			echo server=127.0.0.1#$PDNSD_LOCAL_PORT > /var/etc/dnsmasq-go.d/01-pollution.conf
+			uci set dhcp.@dnsmasq[0].resolvfile=/tmp/resolv.conf.auto
+			uci delete dhcp.@dnsmasq[0].noresolv
+			uci commit dhcp
 			;;
 		tcp_proxy)
 			start_pdnsd "$vt_safe_dns" "$vt_dns_mode"
 			echo server=127.0.0.1#$PDNSD_LOCAL_PORT > /var/etc/dnsmasq-go.d/01-pollution.conf
+			uci delete dhcp.@dnsmasq[0].resolvfile
+			uci set dhcp.@dnsmasq[0].noresolv=1
+			uci commit dhcp
 			;;
 		tunnel_gfwlist)
 			/usr/bin/ssr-tunnel -c $SSR_CONF -u -b0.0.0.0 -l$SS_TUNNEL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_TUNNEL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port			
@@ -294,14 +304,24 @@ EOF
 			
 			awk -vs="127.0.0.1#$PDNSD_LOCAL_PORT" '!/^$/&&!/^#/{printf("server=/%s/%s\n",$0,s)}' \
 				/etc/gfwlist/userlist >> /var/etc/dnsmasq-go.d/01-pollution.conf
+
+			uci set dhcp.@dnsmasq[0].resolvfile=/tmp/resolv.conf.auto
+			uci delete dhcp.@dnsmasq[0].noresolv
+			uci commit dhcp
 			;;
 
 		safe_only)
 			echo server=$vt_safe_dns#$vt_safe_dns_port > /var/etc/dnsmasq-go.d/01-pollution.conf
+			uci delete dhcp.@dnsmasq[0].resolvfile
+			uci set dhcp.@dnsmasq[0].noresolv=1
+			uci commit dhcp
 			;;
 		tunnel_all)
 			/usr/bin/ssr-tunnel -c $SSR_CONF -u -b0.0.0.0 -l$SS_TUNNEL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_TUNNEL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port
 			echo server=127.0.0.1#$SS_TUNNEL_PORT > /var/etc/dnsmasq-go.d/01-pollution.conf
+			uci delete dhcp.@dnsmasq[0].resolvfile
+			uci set dhcp.@dnsmasq[0].noresolv=1
+			uci commit dhcp
 			;;
 	esac
 	
@@ -374,6 +394,9 @@ stop()
 
 	# -----------------------------------------------------------------
 	rm -rf /var/etc/dnsmasq-go.d
+	uci set dhcp.@dnsmasq[0].resolvfile=/tmp/resolv.conf.auto
+	uci delete dhcp.@dnsmasq[0].noresolv
+	uci commit dhcp
 	if [ -f /tmp/dnsmasq.d/dnsmasq-go.conf ]; then
 		rm -f /tmp/dnsmasq.d/dnsmasq-go.conf
 		/etc/init.d/dnsmasq restart
@@ -406,6 +429,7 @@ stop()
 		rm -f $SS_TUNNEL_PIDFILE
 	fi
 }
+
 
 restart()
 {
