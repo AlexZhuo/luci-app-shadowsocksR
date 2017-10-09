@@ -70,6 +70,7 @@ protocol:value("auth_sha1_v2")
 protocol:value("auth_sha1_v4")
 protocol:value("auth_aes128_sha1")
 protocol:value("auth_aes128_md5")
+protocol:value("auth_chain_a")
 
 obfs = s:option(ListValue, "obfs", translate("Obfs"))
 obfs:value("plain")
