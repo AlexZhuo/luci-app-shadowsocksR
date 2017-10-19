@@ -72,6 +72,24 @@ make menuconfig
 make package/luci-app-shadowsocksR/compile V=99
 ```
 
+从 LEDE源码 编译  
+```bash
+# 安装依赖
+sudo apt-get install subversion g++ zlib1g-dev build-essential git python rsync man-db libncurses5-dev gawk gettext unzip file libssl-dev wget
+# Clone LEDE
+git clone git@github.com:daiaji/source.git lede
+cd lede
+# Clone 项目
+git clone git@github.com:daiaji/luci-app-shadowsocksR.git package/luci-app-shadowsocksR
+./scripts/feeds update -a
+./scripts/feeds install -a
+make defconfig
+# 选择要编译的包 NetWork -> LuCI -> luci-app-shadowsocksR
+make menuconfig
+# 开始编译
+make V=99
+```
+
 软件截图
 ---
 
@@ -83,3 +101,11 @@ make package/luci-app-shadowsocksR/compile V=99
 [openwrt-sdk]: https://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [haproxy]: https://github.com/AlexZhuo/luci-app-haproxy-tcp
 [kcptun]: https://github.com/AlexZhuo/luci-app-kcptun
+
+关于本Fork的说明
+---
+用于修正工作在LEDE时产生的问题
+
+替换shadowsocksr-libev依赖为shadowsocksr-libev-mbedtls
+
+移除了pdnsd的依赖 需要请自行添加
