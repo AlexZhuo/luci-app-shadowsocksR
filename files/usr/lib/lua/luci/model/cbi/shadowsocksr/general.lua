@@ -58,6 +58,7 @@ method:value("seed-cfb")
 method:value("salsa20")
 method:value("chacha20")
 method:value("chacha20-ietf")
+method:value("aes-128-ctr")
 
 protocol = s:option(ListValue, "protocol", translate("Protocol"))
 protocol:value("origin")
