@@ -13,9 +13,9 @@ START=99
 #
 
 SS_REDIR_PORT=7070
-SS_TUNNEL_PORT=7071
+SS_LOCAL_PORT=7071
 SS_REDIR_PIDFILE=/var/run/ssr-redir-go.pid 
-SS_TUNNEL_PIDFILE=/var/run/ssr-tunnel-go.pid 
+SS_LOCAL_PIDFILE=/var/run/ssr-local-go.pid 
 PDNSD_LOCAL_PORT=5053 #alex:防止和单独的pdnsd服务冲突
 SSR_CONF=/etc/shadowsocksr.json
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -298,8 +298,8 @@ EOF
 			uci commit dhcp
 			;;
 		tunnel_gfwlist)
-			/usr/bin/ssr-tunnel -c $SSR_CONF -u -b0.0.0.0 -l$SS_TUNNEL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_TUNNEL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port			
-			awk -vs="127.0.0.1#$SS_TUNNEL_PORT" '!/^$/&&!/^#/{printf("server=/%s/%s\n",$0,s)}' \
+			/usr/bin/ssr-local -c $SSR_CONF -u -b0.0.0.0 -l$SS_LOCAL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_LOCAL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port			
+			awk -vs="127.0.0.1#$SS_LOCAL_PORT" '!/^$/&&!/^#/{printf("server=/%s/%s\n",$0,s)}' \
 				/etc/gfwlist/$vt_gfwlist > /var/etc/dnsmasq-go.d/01-pollution.conf
 			
 			awk -vs="127.0.0.1#$PDNSD_LOCAL_PORT" '!/^$/&&!/^#/{printf("server=/%s/%s\n",$0,s)}' \
@@ -317,8 +317,8 @@ EOF
 			uci commit dhcp
 			;;
 		tunnel_all)
-			/usr/bin/ssr-tunnel -c $SSR_CONF -u -b0.0.0.0 -l$SS_TUNNEL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_TUNNEL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port
-			echo server=127.0.0.1#$SS_TUNNEL_PORT > /var/etc/dnsmasq-go.d/01-pollution.conf
+			/usr/bin/ssr-local -c $SSR_CONF -u -b0.0.0.0 -l$SS_LOCAL_PORT -s$vt_server_addr -p$vt_server_port -k"$vt_password" -m$vt_method -t$vt_timeout -f $SS_LOCAL_PIDFILE -L $vt_safe_dns:$vt_safe_dns_port
+			echo server=127.0.0.1#$SS_LOCAL_PORT > /var/etc/dnsmasq-go.d/01-pollution.conf
 			uci delete dhcp.@dnsmasq[0].resolvfile
 			uci set dhcp.@dnsmasq[0].noresolv=1
 			uci commit dhcp
@@ -424,9 +424,9 @@ stop()
 		kill -9 `cat $SS_REDIR_PIDFILE`
 		rm -f $SS_REDIR_PIDFILE
 	fi
-	if [ -f $SS_TUNNEL_PIDFILE ]; then
-		kill -9 `cat $SS_TUNNEL_PIDFILE`
-		rm -f $SS_TUNNEL_PIDFILE
+	if [ -f $SS_LOCAL_PIDFILE ]; then
+		kill -9 `cat $SS_LOCAL_PIDFILE`
+		rm -f $SS_LOCAL_PIDFILE
 	fi
 }
 
