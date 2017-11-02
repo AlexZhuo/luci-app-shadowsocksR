@@ -1,11 +1,9 @@
---[[
- Customize firewall-banned domain lists - /etc/gfwlist/
- Copyright (c) 2015 Justin Liu
- Author: Justin Liu <rssnsj@gmail.com>
- https://github.com/rssnsj/network-feeds
-]]--
+
 
 local fs = require "nixio.fs"
+local china_file = "/etc/ssrr/china_route"
+local user_local_file = "/etc/ssrr/user_local_ip"
+local user_remote_file = "/etc/ssrr/user_remote_ip"
 
 function sync_value_to_file(value, file)
 	value = value:gsub("\r\n?", "\n")
@@ -15,38 +13,54 @@ function sync_value_to_file(value, file)
 	end
 end
 
-m = Map("gfwlist", translate("Domain Lists Settings"),translate("‘GFWList黑名单’可以观察当前域名黑名单，更新后会发生变化;<br>‘海外看视频网站名单’是你在国外回连到国外指定走代理的名单,也就是优酷这样国内视频网站的域名;<br>‘用户自定义网站黑名单’不会被GFWList更新所覆盖，可以手动添加一些强制走代理的网站。<br>注意：点击更新按钮后需要等浏览器自动刷新后才算完成，请勿重复点击，并且自动刷新一遍后需要手动再刷新一遍才能观察到数字变化<br>使用教程请<a href='http://www.right.com.cn/forum/thread-198649-1-1.html'>点击这里</a>"))
-s = m:section(TypedSection, "params", translate("Settings"))
+m = Map("ssrr", translate("路由表"),translate("指定国内外路由表，并且可以设置强制走和不走的网段"))
+s = m:section(TypedSection, "shadowsocksr", translate("Settings"))
 s.anonymous = true
 
-for e in fs.dir("/etc/gfwlist") do
-	glist = s:option(TextValue, e, translate(e), nil)
-	glist.rmempty = false
-	glist.rows = 12
-
-	function glist.cfgvalue()
-		return nixio.fs.readfile("/etc/gfwlist/" .. e) or ""
-	end
-	function glist.write(self, section, value)
-		sync_value_to_file(value, "/etc/gfwlist/" .. e)
-	end
-end
-
-button_update_gfwlist = s:option (Button, "_button_update_gfwlist", translate("更新GFWList"),translate("点击后请静待30秒,等页面刷新后到【服务】-【域名列表】中查看是否成功")) 
-local gfw_count = luci.sys.exec("grep -c '' /etc/gfwlist/china-banned")
-button_update_gfwlist.inputtitle = translate ( "当前规则数目" .. gfw_count .. ",点击更新")
-button_update_gfwlist.inputstyle = "apply" 
-function button_update_gfwlist.write (self, section, value)
-	luci.sys.call ( "/etc/update_gfwlist.sh > /dev/null")
-end 
-
 button_update_route = s:option (Button, "_button_update_chinaroute", translate("更新国内路由表"),translate("点击后请静待30秒,如非特殊需要，不用更新该表")) 
-local route_count = luci.sys.exec("grep -c '' /etc/ipset/china")
+local route_count = luci.sys.exec("grep -c '' " .. china_file)
 button_update_route.inputtitle = translate ( "当前规则数目" .. route_count .. ",点击更新")
 button_update_route.inputstyle = "apply" 
 function button_update_route.write (self, section, value)
-	luci.sys.call ( "/etc/update_chinaroute.sh > /dev/null")
+	luci.sys.call ( "nohup sh /etc/ssrr/update_chinaroute.sh > /tmp/gfwupdate.log 2>&1 &")
 end 
+
+
+
+china_route = s:option(TextValue, "china_route", translate("国内IP网段"), nil)
+china_route.description = translate("该列表是国内外分流的主要依据，内容会随着更新而被覆盖")
+china_route.rows = 13
+china_route.wrap = "off"
+china_route.cfgvalue = function(self, section)
+	return fs.readfile(china_file) or ""
+end
+china_route.write = function(self, section, value)
+	fs.writefile(china_file, value:gsub("\r\n", "\n"))
+end
+
+user_local = s:option(TextValue, "user_local", translate("强制不走代理的网段"), nil)
+user_local.description = translate("请不要随意删除，请填写内网网段")
+user_local.rows = 13
+user_local.wrap = "off"
+user_local.cfgvalue = function(self, section)
+	return fs.readfile(user_local_file) or ""
+end
+user_local.write = function(self, section, value)
+	fs.writefile(user_local_file, value:gsub("\r\n", "\n"))
+end
+
+user_remote = s:option(TextValue, "user_remote", translate("强制走代理的网段"), nil)
+user_remote.description = translate("该规则优先权低于强制不走IP的网段,一般需要填写telegram这样软件服务器的IP")
+user_remote.rows = 13
+user_remote.wrap = "off"
+user_remote.cfgvalue = function(self, section)
+	return fs.readfile(user_remote_file) or ""
+end
+user_remote.write = function(self, section, value)
+	fs.writefile(user_remote_file, value:gsub("\r\n", "\n"))
+end
+
+
 
 -- [[ LAN Hosts ]]--
 s = m:section(TypedSection, "lan_hosts", translate("LAN Hosts"))
@@ -67,9 +81,7 @@ o:value("normal", translate("Normal"))
 o:value("gfwlist", translate("GFW-List based auto-proxy"))
 o:value("nochina", translate("All non-China IPs"))
 o:value("game", translate("Game Mode"))
-o:value("game2", translate("Game Mode V2"))
 o:value("all", translate("All Public IPs"))
-o:value("youku", translate("Watching Youku overseas"))
 o.rmempty = false
 
 o = s:option(Flag, "enable", translate("Enable"))

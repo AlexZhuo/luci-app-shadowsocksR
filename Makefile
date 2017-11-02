@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-shadowsocksR
-PKG_VERSION=1.5
+PKG_VERSION=1.6
 PKG_RELEASE:=1
 PKG_MAINTAINER:=Alex Zhuo <1886090@gmail.com>
 
@@ -14,7 +14,7 @@ define Package/$(PKG_NAME)
 	SUBMENU:=Luci
 	PKGARCH:=all
 	TITLE:=luci for shadowsocksR
-        DEPENDS:=+shadowsocksr-libev +pdnsd +ipset +ip +iptables-mod-tproxy +kmod-ipt-tproxy +iptables-mod-nat-extra
+	DEPENDS:=+shadowsocksr-libev +dnsforwarder +ipset +ip +iptables-mod-tproxy +kmod-ipt-tproxy +iptables-mod-nat-extra
 endef
 
 define Package/$(PKG_NAME)/description
@@ -32,6 +32,12 @@ define Build/Prepare
 endef
 
 define Build/Configure
+endef
+
+define Package/dnsforwarder/conffiles
+/etc/init.d/ipset.sh
+/etc/ipset/china
+/etc/ipset/local
 endef
 
 define Build/Compile
