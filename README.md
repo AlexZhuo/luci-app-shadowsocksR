@@ -1,10 +1,12 @@
 OpenWrt LuCI for ShadowsocksR-libev
 ===
-恩山乌卡卡版本的升级版,已在[该固件][O]中应用
+
+用于科学上网的智能透明代理工具
+
 简介
 ---
 
-本软件包是 [shadowsocksR-libev][openwrt-shadowsocksR] 的 LuCI 控制界面,自带GFWList，国内路由表等分流功能。支持一键智能配置
+本软件包是 [shadowsocksR-libev][openwrt-shadowsocksR] 的 LuCI 控制界面,自带GFWList，国内路由表等分流功能。
 
 特性
 
@@ -16,7 +18,7 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 4、支持基于GFWList的智能DNS解析
 
-5、支持`auth_sha1_v4`,`auth_aes128_md5`,`auth_aes128_sha1`等新型混淆协议
+5、支持`auth_sha1_v4`,`auth_aes128_md5`,`auth_aes128_sha1`,`auth_chain_a`等新型混淆协议，`none`加密协议，
 
 6、支持混淆参数和协议参数
 
@@ -26,7 +28,7 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 9、支持GFWlist黑名单和国内路由表手动更新
 
-10、支持ssr-tunnel和pdnsd的DNS解析
+10、配合[dnsforwarder][dnsforwarder]实现TCP协议DNS代理解析
 
 11、支持填写服务器域名或者服务器IP
 
@@ -36,12 +38,19 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 14、支持LAN访问控制（Adbyby/KoolProxy模式需要配合以上二者自己的访问控制功能使用，否则会冲突）
 
+15、支持一键升级国内路由表和GFWList
+
+16、支持用户自定义强制走代理的IP，强制不走代理的IP，强制走代理的域名，强制不走代理的域名
+
+17、内置[Redsocks2][redsocks2]的支持，可透明代理Socks4、Socks5、HTTP端口。（Redsocks2需要另行编译）
+
+
 依赖
 ---
 
 软件包的正常使用需要依赖 `iptables` 和 `ipset`用于流量重定向
 
-`pdnsd`用于TCP协议请求DNS便于转发至SSR服务器
+`dnsforwarder`用于TCP协议请求DNS便于转发至SSR服务器，请到[openwrt-dnsforwarder][dnsforwarder]编译
 
 `ip-full` `iptables-mod-tproxy` `kmod-ipt-tproxy` `iptables-mod-nat-extra` 用于实现UDP转发
 
@@ -75,11 +84,13 @@ make package/luci-app-shadowsocksR/compile V=99
 软件截图
 ---
 
-![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/ssr1.png)
-![demo](https://github.com/AlexZhuo/BreakwallOpenWrt/raw/master/screenshots/ssr2.png)
+![demo](https://github.com/AlexZhuo/luci-app-shadowsocksR/raw/master/screencapture1.png)
+![demo](https://github.com/AlexZhuo/luci-app-shadowsocksR/raw/master/screencapture2.png)
 
 [O]: http://www.right.com.cn/forum/thread-198649-1-1.html
 [openwrt-shadowsocksR]: https://github.com/AlexZhuo/openwrt-shadowsocksr
 [openwrt-sdk]: https://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [haproxy]: https://github.com/AlexZhuo/luci-app-haproxy-tcp
 [kcptun]: https://github.com/AlexZhuo/luci-app-kcptun
+[dnsforwarder]: https://github.com/AlexZhuo/openwrt-dnsforwarder
+[redsocks2]: https://github.com/AlexZhuo/openwrt-redsocks2
