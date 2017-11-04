@@ -199,11 +199,9 @@ EOF
 		ipset create $vt_remote_ipset hash:net family inet hashsize 1024 maxelem 65536
 		awk '{system("ipset add remoteip "$0)}' $user_remote_file
 	}
-	
+
 	[ -f $china_file ] && {
-		echo add remote ip  $china_file $vt_np_ipset
 		ipset create $vt_np_ipset hash:net family inet hashsize 1024 maxelem 65536
-		awk '{system("ipset add chinaip "$0)}' $china_file
 	}
 
 	iptables -t nat -A ssrr_pre -m set --match-set $vt_local_ipset dst -j RETURN || { #应对没有安装ipset的用户
@@ -368,12 +366,17 @@ EOF
 			;;
 	esac
 
+	local ipcount=`ipset list $vt_np_ipset | wc -l`
+	echo china ips count is $ipcount
+	[ $ipcount -lt "100" ] && {
+		echo add china ip  $china_file $vt_np_ipset
+		awk '{system("ipset add chinaip "$0)}' $china_file
+	}
+
 }
 
 stop()
 {
-	stop_dnsforwarder
-
 	# -----------------------------------------------------------------
 	if iptables -t nat -F ssrr_pre 2>/dev/null; then
 		while iptables -t nat -D prerouting_rule -j ssrr_pre 2>/dev/null; do :; done
@@ -390,7 +393,9 @@ stop()
 	echo clearing ipset
 	ipset destroy $vt_local_ipset
 	ipset destroy $vt_remote_ipset
-	ipset destroy $vt_np_ipset
+	[ $keep_chinaip = 0 ] && ipset destroy $vt_np_ipset
+
+	stop_dnsforwarder
 
 	if [ -f $SS_REDIR_PIDFILE ]; then
 		kill -9 `cat $SS_REDIR_PIDFILE`
@@ -406,9 +411,11 @@ stop()
 	fi
 }
 
+keep_chinaip=0
 
 restart()
 {
+	keep_chinaip=1
 	stop
 	start
 }
@@ -416,8 +423,50 @@ restart()
 # $1: upstream DNS server
 start_dnsforwarder()
 {
+	echo reday to start dnsforwarder by ssr
+	
+	local safe_dns="$1"
+	local dns_mode="$2"
+
+	case "$dns_mode" in
+		tcp_gfwlist)
+			if iptables -t nat -N pdnsd_output; then
+				echo gfwlist dns mode
+				iptables -t nat -A pdnsd_output -p tcp -j REDIRECT --to $SS_REDIR_PORT
+				iptables -t nat -I OUTPUT -p tcp --dport 53 -j pdnsd_output
+				iptables -t nat -A ssrr_pre -p udp --dport 53 -j REDIRECT --to-ports 53
+			fi
+			;;
+		tcp_proxy)
+			if iptables -t nat -N pdnsd_output; then
+				echo gfwlist dns mode
+				iptables -t nat -A pdnsd_output -m set --match-set $vt_np_ipset dst -j RETURN
+				iptables -t nat -A pdnsd_output -p tcp -j REDIRECT --to $SS_REDIR_PORT
+				iptables -t nat -I OUTPUT -p tcp --dport 53 -j pdnsd_output
+				iptables -t nat -A ssrr_pre -p udp --dport 53 -j REDIRECT --to-ports $PDNSD_LOCAL_PORT
+			fi
+			;;
+	esac
+
+	
+	
+	uci set dnsforwarder.@arguments[0].enabled=1 
+	uci set dnsforwarder.@arguments[0].dnsmasq=1
+	uci set dnsforwarder.@arguments[0].addr=127.0.0.1:$PDNSD_LOCAL_PORT
+	uci set dnsforwarder.@arguments[0].mode=gfw_user
+	uci set dnsforwarder.@arguments[0].ipset=1
+	uci set dnsforwarder.@arguments[0].ipset_name=china-banned
+	[ "$white" = 1 ] && { #启用强制不代理列表
+		uci set dnsforwarder.@arguments[0].white=1
+		uci set dnsforwarder.@arguments[0].whiteset=$WHITE_SET
+		uci set dnsforwarder.@arguments[0].whitedns=114.114.114.114
+	}
+
+	uci commit dnsforwarder
+
 	dns_pid1=`ps | awk '$5 ~ /\[dnsforwarder\]/ {print $1}'`
 	dns_pid2=`cat $dnsforwarder_pid 2>/dev/null` 
+
 	[ "$dns_pid1" -gt 1 ] && {
 		echo dnsforwarder is running,need not start!
 		return	
@@ -426,9 +475,8 @@ start_dnsforwarder()
 		echo dnsforwarder has been started,need not start!
 		return	
 	}
-	echo reday to start dnsforwarder
-	local safe_dns="$1"
-	local dns_mode="$2"
+
+	echo safe dns = $safe_dns dns mode is $dns_mode
 	local white=`uci get ssrr.@shadowsocksr[0].white 2>/dev/null`
 
 	local tcp_dns_list="208.67.222.222,208.67.220.220" #alex:给pdnsd使用的可靠的国外dns服务器
@@ -443,40 +491,9 @@ start_dnsforwarder()
 
 			;;
 	esac
-	
 
-	case "$dns_mode" in
-		tcp_gfwlist)
-			if iptables -t nat -N pdnsd_output; then
-				iptables -t nat -A pdnsd_output -p tcp -j REDIRECT --to $SS_REDIR_PORT
-			fi
-			iptables -t nat -I OUTPUT -p tcp --dport 53 -j pdnsd_output
-			iptables -t nat -A ssrr_pre -p udp --dport 53 -j REDIRECT --to-ports 53
-			;;
-		tcp_proxy)
-			if iptables -t nat -N pdnsd_output; then
-				iptables -t nat -A pdnsd_output -m set --match-set $vt_np_ipset dst -j RETURN
-				iptables -t nat -A pdnsd_output -p tcp -j REDIRECT --to $SS_REDIR_PORT
-			fi
-			iptables -t nat -A 
-			iptables -t nat -I OUTPUT -p tcp --dport 53 -j pdnsd_output
-			iptables -t nat -A ssrr_pre -p udp --dport 53 -j REDIRECT --to-ports $PDNSD_LOCAL_PORT
-			;;
-	esac
-	
-	uci set dnsforwarder.@arguments[0].enabled=1 
-	uci set dnsforwarder.@arguments[0].dnsmasq=1
-	uci set dnsforwarder.@arguments[0].addr=127.0.0.1:$PDNSD_LOCAL_PORT
-	uci set dnsforwarder.@arguments[0].mode=gfw_user
-	uci set dnsforwarder.@arguments[0].ipset=1
-	uci set dnsforwarder.@arguments[0].ipset_name=china-banned
-	[ "$white" = 1 ] && { #启用强制不代理列表
-		uci set dnsforwarder.@arguments[0].white=1
-		uci set dnsforwarder.@arguments[0].whiteset=$WHITE_SET
-		uci set dnsforwarder.@arguments[0].whitedns=114.114.114.114
-	}
-	uci commit dnsforwarder
-	[ ! -f /etc/dnsforwarder/dnsforwarder.conf.bak ] && {
+
+	[ ! -f "/etc/dnsforwarder/dnsforwarder.conf.bak" ] && {
 		cp /etc/dnsforwarder/dnsforwarder.conf /etc/dnsforwarder/dnsforwarder.conf.bak
 	}
 	cat > /etc/dnsforwarder/dnsforwarder.conf <<EOF
@@ -525,6 +542,6 @@ stop_dnsforwarder()
 	uci set dnsforwarder.@arguments[0].enabled=0
 	uci commit dnsforwarder
 	/etc/init.d/dnsforwarder restart
-	cp /etc/dnsforwarder/dnsforwarder.conf.bak /etc/dnsforwarder/dnsforwarder.conf
+	[ -f  "/etc/dnsforwarder/dnsforwarder.conf.bak" ] && cp /etc/dnsforwarder/dnsforwarder.conf.bak /etc/dnsforwarder/dnsforwarder.conf
 	rm -f /etc/dnsforwarder/dnsforwarder.conf.bak
 }

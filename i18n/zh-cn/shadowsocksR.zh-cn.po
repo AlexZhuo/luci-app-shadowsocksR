@@ -148,8 +148,14 @@ msgstr "推荐使用GFWList自动模式,可分流国内外"
 msgid "leave it empty is well"
 msgstr "一般不填"
 
-msgid "Game Mode V2"
-msgstr "游戏模式V2"
+msgid "Enable ssr-local"
+msgstr "同时开启ssr-local"
+
+msgid "Open ssr-local port as well"
+msgstr "开启ssr-local有利于排查问题"
+
+
+
 
 
 

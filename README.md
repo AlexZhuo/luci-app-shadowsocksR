@@ -42,7 +42,9 @@ OpenWrt LuCI for ShadowsocksR-libev
 
 16、支持用户自定义强制走代理的IP，强制不走代理的IP，强制走代理的域名，强制不走代理的域名
 
-17、内置[Redsocks2][redsocks2]的支持，可透明代理Socks4、Socks5、HTTP端口。（Redsocks2需要另行编译）
+17、支持同时开启ss-local建立socks5代理端口
+
+18、内置[Redsocks2][redsocks2]的支持，可透明代理Socks4、Socks5、HTTP端口。（Redsocks2需要另行编译）
 
 
 依赖

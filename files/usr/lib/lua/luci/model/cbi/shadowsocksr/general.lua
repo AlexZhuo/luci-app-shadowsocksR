@@ -138,7 +138,7 @@ timeout:depends("more", "1")
 
 proxy_mode = s:option(ListValue, "proxy_mode", translate("Proxy Mode"),
 	translate("GFW-List mode requires flushing DNS cache") .. "<br /> " ..
-	"<a href=\"" .. luci.dispatcher.build_url("admin", "services","shadowsocksr","gfwlist") .. "\">" ..
+	"<a href=\"" .. luci.dispatcher.build_url("admin", "services","dnsforwarder","gfwlist") .. "\">" ..
 	translate("Click here to customize your GFW-List") ..
 	"</a>")
 proxy_mode:value("S", translate("All non-China IPs"))
