@@ -149,7 +149,7 @@ redsocks {
 EOF
 			[ ! -z $username ] && {
 				echo "login = $username;" >> $SSR_CONF
-				echo "password = $password;" >> $SSR_CONF
+				echo "password = $vt_password;" >> $SSR_CONF
 			}
 			echo "}" >> $SSR_CONF
 			
@@ -166,7 +166,7 @@ redudp {
 EOF
 				[ ! -z $username ] && {
 					echo "login = $username;" >> $SSR_CONF
-					echo "password = $password;" >> $SSR_CONF
+					echo "password = $vt_password;" >> $SSR_CONF
 				}
 				echo "}" >> $SSR_CONF
 			fi
